@@ -1,0 +1,24 @@
+# Fichiers generes par Maven
+target/
+
+# Logs
+*.log
+
+# Fichiers Java compiles
+*.class
+
+# Configuration locale / secrets
+.env
+.env.*
+*.properties.local
+
+# VS Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Systeme
+.DS_Store
+Thumbs.db

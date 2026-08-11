@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  vprodb:
+    image: mysql:8
+    container_name: vprodb
+    environment:
+      - MYSQL_ROOT_PASSWORD=vprodbpass
+      - MYSQL_DATABASE=accounts
+    volumes:
+      - vpro-db-data:/var/lib/mysql
+      # On injecte le fichier d'initialisation de la BDD directement au démarrage
+      - ./src/main/resources/db_backup.sql:/docker-entrypoint-initdb.d/db_backup.sql
+    networks:
+      - vpro-net
+    ports:
+      - "3306:3306"
+
+  vprocache:
+    image: memcached
+    container_name: vprocache
+    networks:
+      - vpro-net
+    ports:
+      - "11211:11211"
+
+  vpromq:
+    image: rabbitmq:management
+    container_name: vpromq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - vpro-net
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Interface d'administration web de RabbitMQ
+
+  vproapp:
+    # Au lieu d'utiliser l'image déjà buildée, on dit à Compose de la (re)construire
+    build: .
+    image: vprofile-app:compose
+    container_name: vproapp
+    ports:
+      - "8080:8080"
+    networks:
+      - vpro-net
+    depends_on:
+      - vprodb
+      - vprocache
+      - vpromq
+
+volumes:
+  vpro-db-data:
+
+networks:
+  vpro-net:
+    driver: bridge
